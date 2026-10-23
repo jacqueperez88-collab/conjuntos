@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teoría de Conjuntos — Matemática General</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbf9f4; --panel:#ffffff; --panel2:#faf7ff; --soft:#f6f3fb;
+  --line:#e7e1f0; --line2:#d8d0e8;
+  --ink:#2c2740; --mut:#6f6a85;
+  --amber:#f6b73c; --amber-t:#b4690e; --sky:#54c8f5; --sky-t:#0e7fb8;
+  --teal:#3ddbb4; --teal-t:#0d7d6c; --rose:#fb7185; --rose-t:#d43d5b;
+  --lav:#c4b5fd; --peach:#fdba74;
+  --disp:"Fraunces",serif; --body:"Instrument Sans",sans-serif; --mono:"JetBrains Mono",monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--body); background:var(--bg); color:var(--ink);
+  line-height:1.6; overflow-x:hidden;
+}
+/* ---- fondo pastel con cuadrícula suave ---- */
+body::before{
+  content:""; position:fixed; inset:0; z-index:-2;
+  background:
+    radial-gradient(900px 520px at 85% -5%, rgba(196,181,253,.28), transparent 60%),
+    radial-gradient(800px 520px at 0% 12%, rgba(253,186,116,.22), transparent 55%),
+    radial-gradient(900px 600px at 100% 70%, rgba(153,228,213,.20), transparent 55%),
+    radial-gradient(700px 500px at 10% 90%, rgba(186,225,250,.25), transparent 55%),
+    repeating-linear-gradient(0deg, rgba(120,110,170,.07) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(90deg, rgba(120,110,170,.07) 0 1px, transparent 1px 34px),
+    var(--bg);
+}
+::selection{background:var(--amber); color:#3d2a05}
+
+/* ---- barra de progreso ---- */
+#prog{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--amber),var(--rose));z-index:99;transition:width .1s linear}
+
+/* ---- nav ---- */
+nav{
+  position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:1.4rem;
+  padding:.8rem clamp(1rem,4vw,3rem);background:rgba(255,255,255,.82);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+}
+.logo{font-family:var(--disp);font-weight:800;font-size:1.25rem;letter-spacing:.5px;white-space:nowrap;color:var(--ink)}
+.logo b{color:var(--amber-t)} .logo i{color:var(--sky-t);font-style:normal}
+nav .links{display:flex;gap:.2rem;flex-wrap:wrap;margin-left:auto}
+nav .links a{
+  color:var(--mut);text-decoration:none;font-size:.85rem;font-weight:600;
+  padding:.35rem .7rem;border-radius:6px;transition:.25s;
+}
+nav .links a:hover{color:var(--ink);background:var(--soft);transform:translateY(-1px)}
+
+/* ---- hero ---- */
+header{position:relative;padding:clamp(3rem,8vh,6rem) clamp(1rem,5vw,4rem) 4rem;
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:3rem;align-items:center;max-width:1300px;margin:0 auto}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--amber-t);margin-bottom:1.2rem}
+.eyebrow span{color:var(--mut)}
+h1{font-family:var(--disp);font-weight:900;font-size:clamp(3rem,7.5vw,5.6rem);line-height:.98;letter-spacing:-.01em;color:var(--ink)}
+h1 em{font-style:italic;color:var(--amber-t)}
+.h-sub{margin-top:1.4rem;font-size:clamp(1.05rem,1.6vw,1.25rem);color:var(--mut);max-width:34rem}
+.h-sub strong{color:var(--ink)}
+.quote{margin-top:1.8rem;padding-left:1.1rem;border-left:3px solid var(--sky);color:var(--mut);font-style:italic;max-width:32rem;font-size:.95rem}
+.cta{margin-top:2.2rem;display:flex;gap:.9rem;flex-wrap:wrap}
+.btn{font-family:var(--body);font-weight:700;font-size:.92rem;padding:.8rem 1.5rem;border-radius:8px;
+  text-decoration:none;transition:.25s;border:1px solid transparent;cursor:pointer}
+.btn-a{background:var(--amber);color:#3d2a05;box-shadow:0 6px 18px -6px rgba(246,183,60,.55)}
+.btn-a:hover{transform:translateY(-3px);box-shadow:0 12px 30px -8px rgba(246,183,60,.6)}
+.btn-b{border-color:var(--line2);color:var(--ink);background:#fff}
+.btn-b:hover{border-color:var(--sky);color:var(--sky-t);transform:translateY(-3px)}
+.syms{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:-1}
+.syms span{position:absolute;font-family:var(--mono);color:rgba(139,128,178,.28);font-weight:700;animation:float 9s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-22px) rotate(6deg)}}
+.venn-hero{filter:drop-shadow(0 22px 40px rgba(148,130,190,.28));animation:bob 7s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+
+/* ---- secciones ---- */
+section{max-width:1300px;margin:0 auto;padding:4.5rem clamp(1rem,5vw,4rem)}
+.sec-head{display:flex;align-items:baseline;gap:1.2rem;margin-bottom:2.4rem;border-bottom:1px solid var(--line);padding-bottom:1.2rem}
+.sec-num{font-family:var(--mono);color:var(--rose-t);font-size:.95rem;font-weight:700}
+h2{font-family:var(--disp);font-weight:800;font-size:clamp(1.9rem,3.6vw,2.9rem);letter-spacing:-.01em;color:var(--ink)}
+h2 em{font-style:italic;color:var(--sky-t)}
+h3{font-family:var(--disp);font-weight:700;font-size:1.3rem;margin-bottom:.7rem;color:var(--ink)}
+p.lead{color:var(--mut);max-width:52rem}
+.def{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--amber);
+  padding:1.3rem 1.5rem;border-radius:0 10px 10px 0;font-size:1.05rem;max-width:56rem;
+  box-shadow:0 8px 24px -14px rgba(120,100,170,.25)}
+.def .mono{display:block;margin-top:.5rem;color:var(--teal-t);font-size:.92rem}
+.mono{font-family:var(--mono)}
+.hi-a{color:var(--amber-t);font-weight:700}.hi-b{color:var(--sky-t);font-weight:700}
+.hi-t{color:var(--teal-t);font-weight:700}.hi-r{color:var(--rose-t);font-weight:700}
+
+/* ---- tarjetas ---- */
+.grid{display:grid;gap:1.1rem}
+.g4{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1.3rem 1.4rem;
+  transition:.3s;position:relative;overflow:hidden;box-shadow:0 6px 20px -14px rgba(120,100,170,.3)}
+.card::after{content:"";position:absolute;left:0;top:0;height:3px;width:0;background:var(--amber);transition:.35s}
+.card:hover{transform:translateY(-5px);border-color:var(--line2);background:var(--panel2);box-shadow:0 14px 30px -14px rgba(120,100,170,.35)}
+.card:hover::after{width:100%}
+.card h4{font-family:var(--mono);font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--sky-t);margin-bottom:.6rem}
+.card .set{font-family:var(--mono);font-size:.95rem;color:var(--ink)}
+.card small{color:var(--mut)}
+
+/* ---- demo pertenencia ---- */
+.demo{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1.8rem;margin-top:1.6rem;
+  box-shadow:0 10px 30px -16px rgba(120,100,170,.3)}
+.demo-row{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-top:1rem}
+.chip{font-family:var(--mono);display:inline-grid;place-items:center;width:46px;height:46px;border-radius:50%;
+  border:2px solid var(--line2);background:#fff;color:var(--mut);font-size:1.15rem;font-weight:700;transition:.3s}
+.chip.hit{border-color:var(--amber);color:#3d2a05;background:var(--amber);transform:scale(1.18) rotate(-6deg);box-shadow:0 8px 24px -6px rgba(246,183,60,.6)}
+input[type=text]{background:#fff;border:1px solid var(--line2);color:var(--ink);
+  font-family:var(--mono);font-size:1.1rem;padding:.7rem 1rem;border-radius:8px;width:150px;outline:none;transition:.25s}
+input[type=text]:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(84,200,245,.22)}
+.veredicto{font-family:var(--mono);font-size:1.15rem;font-weight:700;min-width:170px;transition:.3s;color:var(--mut)}
+.veredicto.ok{color:var(--teal-t)} .veredicto.no{color:var(--rose-t)}
+
+/* ---- dos columnas ---- */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:1.6rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1.8rem;transition:.3s;
+  box-shadow:0 8px 24px -16px rgba(120,100,170,.3)}
+.panel:hover{border-color:var(--line2)}
+.panel .tag{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;padding:.3rem .7rem;border-radius:4px;display:inline-block;margin-bottom:1rem}
+.tag-a{background:rgba(246,183,60,.16);color:var(--amber-t);border:1px solid rgba(246,183,60,.5)}
+.tag-b{background:rgba(84,200,245,.14);color:var(--sky-t);border:1px solid rgba(84,200,245,.5)}
+.panel .formula{font-family:var(--mono);font-size:1.08rem;color:var(--ink);background:var(--soft);
+  border:1px dashed var(--line2);padding:.9rem 1.1rem;border-radius:8px;margin:.8rem 0}
+.panel p{color:var(--mut);font-size:.95rem}
+
+/* ---- ejercicios ---- */
+.ej-box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1.5rem 1.7rem;margin-top:1.4rem;
+  box-shadow:0 8px 24px -16px rgba(120,100,170,.3)}
+.ej-box .ej-t{font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--rose-t);margin-bottom:.8rem}
+.ex-item{border-top:1px dashed var(--line2);padding:.9rem 0}
+.ex-item:first-of-type{border-top:none}
+.ex-q{font-family:var(--mono);font-size:1rem;color:var(--ink)}
+.reveal-btn{margin-top:.5rem;background:var(--soft);border:1px solid var(--line2);color:var(--mut);
+  font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;padding:.35rem .8rem;border-radius:6px;cursor:pointer;transition:.25s}
+.reveal-btn:hover{border-color:var(--teal);color:var(--teal-t)}
+.ex-a{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s ease}
+.ex-a>div{overflow:hidden}
+.ex-a .ans{font-family:var(--mono);color:var(--teal-t);padding-top:.6rem;font-size:1rem}
+.open .ex-a{grid-template-rows:1fr}
+.open .reveal-btn{border-color:var(--teal);color:var(--teal-t)}
+
+/* ---- laboratorio de operaciones ---- */
+.lab{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:2.4rem;align-items:start;margin-top:1rem}
+.lab-svg-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.4rem;position:sticky;top:90px;
+  box-shadow:0 12px 34px -18px rgba(120,100,170,.35)}
+.ops-btns{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.4rem}
+.op-btn{font-family:var(--mono);font-size:.9rem;font-weight:700;padding:.55rem 1.1rem;border-radius:999px;
+  border:1px solid var(--line2);background:#fff;color:var(--mut);cursor:pointer;transition:.28s}
+.op-btn:hover{transform:translateY(-2px);color:var(--ink);border-color:var(--sky)}
+.op-btn.act{background:var(--amber);border-color:var(--amber);color:#3d2a05;box-shadow:0 8px 22px -8px rgba(246,183,60,.6)}
+.op-info{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.8rem;
+  box-shadow:0 12px 34px -18px rgba(120,100,170,.35)}
+.op-tag{font-family:var(--mono);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--rose-t)}
+.op-sym{font-family:var(--disp);font-style:italic;font-weight:800;font-size:clamp(2.4rem,4vw,3.4rem);margin:.3rem 0 .8rem;color:var(--amber-t)}
+.op-def{font-family:var(--mono);background:var(--soft);border:1px dashed var(--line2);border-radius:8px;padding:.9rem 1.1rem;color:var(--teal-t);font-size:.98rem}
+.op-desc{color:var(--mut);margin:1rem 0}
+.op-res{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
+.op-res .lbl{font-family:var(--mono);font-size:.78rem;color:var(--mut);letter-spacing:.1em;text-transform:uppercase}
+.elem{font-family:var(--mono);font-weight:700;background:rgba(13,125,108,.09);border:1px solid rgba(13,125,108,.35);
+  color:var(--teal-t);padding:.25rem .65rem;border-radius:6px;animation:pop .4s both}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.region{fill-opacity:.10;transition:fill-opacity .5s ease;cursor:pointer}
+.region.on{fill-opacity:.85}
+.lab-label{font-family:var(--mono);font-weight:700;fill:#4a4364;opacity:.4;transition:.4s}
+.lab-label.on{opacity:1}
+.set-name{font-family:var(--disp);font-style:italic;font-weight:800;font-size:24px}
+
+/* ---- propiedades ---- */
+.props{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:1rem;margin-top:1.4rem}
+.prop{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1rem 1.2rem;transition:.3s;
+  box-shadow:0 6px 20px -16px rgba(120,100,170,.35)}
+.prop:hover{transform:translateY(-4px);border-color:var(--amber)}
+.prop .p-name{font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--amber-t);display:block;margin-bottom:.4rem}
+.prop code{font-family:var(--mono);font-size:.92rem;color:var(--ink)}
+
+/* ---- pertenencia vs inclusión ---- */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:1.4rem}
+.vs .panel{text-align:left}
+.vs .big{font-family:var(--disp);font-size:2.6rem;font-weight:800;line-height:1}
+
+/* ---- partes ---- */
+.subsets{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1rem}
+.subset{font-family:var(--mono);background:var(--panel);border:1px solid var(--line2);padding:.5rem .95rem;border-radius:8px;
+  color:var(--mut);transition:.3s;cursor:default;font-size:.95rem;box-shadow:0 4px 14px -12px rgba(120,100,170,.4)}
+.subset:hover{color:var(--amber-t);border-color:var(--amber);transform:translateY(-4px) rotate(-2deg)}
+
+/* ---- cardinal / club ---- */
+.formula-big{font-family:var(--mono);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--teal);
+  border-radius:0 10px 10px 0;padding:1.2rem 1.5rem;margin:1.2rem 0;font-size:clamp(.78rem,1.6vw,1rem);overflow-x:auto;color:var(--ink);
+  box-shadow:0 8px 24px -16px rgba(120,100,170,.3)}
+.club{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:2.4rem;align-items:start;margin-top:1.6rem}
+.data-list{list-style:none;margin-top:1rem}
+.data-list li{display:flex;justify-content:space-between;gap:1rem;padding:.55rem .2rem;border-bottom:1px dashed var(--line2);font-size:.95rem;color:var(--mut)}
+.data-list li b{font-family:var(--mono);color:var(--ink)}
+.res-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin-top:1.4rem}
+.res-cell{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.8rem 1rem;transition:.3s}
+.res-cell:hover{border-color:var(--sky);transform:translateY(-3px)}
+.res-cell .n{font-family:var(--disp);font-weight:800;font-size:1.7rem;color:var(--amber-t)}
+.res-cell .d{font-size:.78rem;color:var(--mut);line-height:1.35}
+
+/* ---- footer ---- */
+footer{border-top:1px solid var(--line);margin-top:3rem;padding:2.6rem clamp(1rem,5vw,4rem);text-align:center;color:var(--mut);background:rgba(255,255,255,.6)}
+footer .f-mark{font-family:var(--disp);font-size:2rem;font-weight:800;color:var(--ink)}
+footer .f-mark b{color:var(--amber-t)}footer .f-mark i{color:var(--sky-t);font-style:normal}
+footer p{font-size:.85rem;margin-top:.6rem}
+
+/* ---- reveal on scroll ---- */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+@media(max-width:960px){
+  header{grid-template-columns:1fr}
+  .venn-hero{max-width:440px;margin:0 auto}
+  .lab,.club,.duo,.vs{grid-template-columns:1fr}
+  .lab-svg-wrap{position:static}
+  nav .links{overflow-x:auto;flex-wrap:nowrap}
+}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+
+<nav>
+  <div class="logo"><b>A</b> ∪ <i>B</i></div>
+  <div class="links">
+    <a href="#conceptos">Conceptos</a>
+    <a href="#determinacion">Determinación</a>
+    <a href="#especiales">Especiales</a>
+    <a href="#inclusion">Inclusión</a>
+    <a href="#operaciones">Operaciones</a>
+    <a href="#partes">P(A)</a>
+    <a href="#cardinal">Cardinal</a>
+    <a href="#ejercicios">Ejercicios</a>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header>
+  <div class="syms" aria-hidden="true">
+    <span style="top:8%;left:4%;font-size:2.6rem;animation-delay:0s">∈</span>
+    <span style="top:70%;left:2%;font-size:2rem;animation-delay:1.4s">⊆</span>
+    <span style="top:14%;left:52%;font-size:1.8rem;animation-delay:.7s">∩</span>
+    <span style="top:82%;left:46%;font-size:2.4rem;animation-delay:2s">∪</span>
+    <span style="top:38%;left:96%;font-size:2rem;animation-delay:1s">∅</span>
+    <span style="top:6%;left:88%;font-size:1.7rem;animation-delay:2.4s">△</span>
+    <span style="top:88%;left:90%;font-size:1.9rem;animation-delay:.4s">∉</span>
+    <span style="top:55%;left:60%;font-size:1.5rem;animation-delay:1.8s">∀x</span>
+  </div>
+
+  <div>
+    <p class="eyebrow">Matemática General <span>· Apunte de cátedra · Prof. Gustavo Vazquez</span></p>
+    <h1>Teoría de<br><em>Conjuntos</em></h1>
+    <p class="h-sub">Una <strong>colección de objetos</strong> — concretos o abstractos — y el lenguaje con el que la matemática los organiza: pertenencia, inclusión y operaciones.</p>
+    <p class="quote">“Cada día, en nuestra conversación, por los medios de comunicación, en la lectura de un diario o en el trabajo está presente la idea de conjunto.”</p>
+    <div class="cta">
+      <a class="btn btn-a" href="#operaciones">Laboratorio de operaciones →</a>
+      <a class="btn btn-b" href="#ejercicios">Resolver ejercicios</a>
+    </div>
+  </div>
+
+  <svg class="venn-hero" viewBox="0 0 380 300" role="img" aria-label="Diagrama de Venn de dos conjuntos">
+    <defs>
+      <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f6b73c" stop-opacity=".55"/><stop offset="1" stop-color="#f6b73c" stop-opacity=".22"/>
+      </linearGradient>
+      <linearGradient id="gB" x1="1" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#54c8f5" stop-opacity=".55"/><stop offset="1" stop-color="#54c8f5" stop-opacity=".22"/>
+      </linearGradient>
+      <mask id="hmInB"><circle cx="230" cy="150" r="90" fill="#fff"/></mask>
+    </defs>
+    <rect x="10" y="10" width="360" height="280" rx="8" fill="#fffdf8" stroke="#c9c0dd" stroke-width="2"/>
+    <text x="24" y="36" class="set-name" fill="#6f6a85" font-size="18">U</text>
+    <circle cx="150" cy="150" r="90" fill="url(#gA)"/>
+    <circle cx="230" cy="150" r="90" fill="url(#gB)"/>
+    <circle cx="150" cy="150" r="90" fill="#3ddbb4" opacity=".9" mask="url(#hmInB)"/>
+    <circle cx="150" cy="150" r="90" fill="none" stroke="#e8960c" stroke-width="2.5"/>
+    <circle cx="230" cy="150" r="90" fill="none" stroke="#22a9e0" stroke-width="2.5"/>
+    <text x="66" y="72" class="set-name" fill="#d97706">A</text>
+    <text x="298" y="72" class="set-name" fill="#0e7fb8">B</text>
+    <text x="92" y="140" class="lab-label on" font-size="15">a</text>
+    <text x="80" y="176" class="lab-label on" font-size="15">e</text>
+    <text x="112" y="196" class="lab-label on" font-size="15">i</text>
+    <text x="180" y="142" class="lab-label on" font-size="15" fill="#0b3d34">o</text>
+    <text x="198" y="172" class="lab-label on" font-size="15" fill="#0b3d34">u</text>
+    <text x="282" y="140" class="lab-label on" font-size="15">b</text>
+    <text x="270" y="176" class="lab-label on" font-size="15">c</text>
+    <text x="42" y="52" class="lab-label on" font-size="13" opacity=".45">1</text>
+    <text x="330" y="262" class="lab-label on" font-size="13" opacity=".45">7</text>
+  </svg>
+</header>
+
+<!-- ================= 01 CONCEPTOS ================= -->
+<section id="conceptos">
+  <div class="sec-head reveal"><span class="sec-num">01</span><h2>Conceptos <em>básicos</em></h2></div>
+
+  <div class="def reveal">
+    Un conjunto es una <strong>colección de elementos diferentes</strong>, que pueden ser concretos o abstractos.
+    Los elementos se representan con <span class="hi-a">letras minúsculas</span> y los conjuntos con <span class="hi-b">letras mayúsculas</span>.
+    <span class="mono">a: pantalla &nbsp; b: teclado &nbsp; c: ratón &nbsp;→&nbsp; <span class="hi-t">A = {a, b, c}</span></span>
+  </div>
+
+  <div class="grid g4 reveal" style="margin-top:1.6rem">
+    <div class="card"><h4>Países de América</h4><p class="set">{Perú, Brasil, Honduras, Canadá, …}</p></div>
+    <div class="card"><h4>Aplicaciones</h4><p class="set">{Word, Excel, PowerPoint, …}</p></div>
+    <div class="card"><h4>Partes de una computadora</h4><p class="set">{pantalla, teclado, ratón}</p></div>
+    <div class="card"><h4>Estudiantes de un curso</h4><p class="set">{María, Pedro, Juana, …}</p></div>
+  </div>
+
+  <div class="grid" style="grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:1.6rem">
+    <div class="panel reveal">
+      <span class="tag tag-a">Pertenencia ∈</span>
+      <h3>¿El elemento está en el conjunto?</h3>
+      <p>Dado el conjunto <span class="mono hi-t">M = {a, e, i, o, u}</span>:</p>
+      <p class="mono" style="margin-top:.7rem;font-size:1.05rem">a <span class="hi-t">∈</span> M &nbsp;&nbsp;·&nbsp;&nbsp; b <span class="hi-r">∉</span> M</p>
+      <p style="margin-top:.9rem;font-size:.88rem">Se lee: “a pertenece a M” · “b no pertenece a M”.</p>
+    </div>
+    <div class="panel reveal">
+      <span class="tag tag-b">Conjunto universal U</span>
+      <h3>El marco de referencia</h3>
+      <p>Es un conjunto lo suficientemente extenso como para contener a los conjuntos con los que trabajamos. Se representa con un rectángulo.</p>
+      <p class="mono" style="margin-top:.7rem">ℕ es referencial respecto de B = {1, 2, 3}</p>
+    </div>
+  </div>
+
+  <div class="demo reveal">
+    <h3>Probalo vos — verificador de pertenencia</h3>
+    <p style="color:var(--mut)">Conjunto <span class="mono hi-t">M = {x / x es vocal del abecedario}</span>. Escribí una letra:</p>
+    <div class="demo-row">
+      <input type="text" id="elemInput" maxlength="2" placeholder="letra…" autocomplete="off">
+      <span class="veredicto" id="veredicto">—</span>
+      <span id="chips">
+        <span class="chip" data-l="a">a</span>
+        <span class="chip" data-l="e">e</span>
+        <span class="chip" data-l="i">i</span>
+        <span class="chip" data-l="o">o</span>
+        <span class="chip" data-l="u">u</span>
+      </span>
+    </div>
+  </div>
+
+  <p class="lead reveal" style="margin-top:1.6rem;font-size:.9rem">📌 <em>Conjunto</em>, <em>elemento</em> y <em>pertenencia</em> son <strong>conceptos primitivos</strong>: la matemática los utiliza sin definirlos.</p>
+</section>
+
+<!-- ================= 02 DETERMINACIÓN ================= -->
+<section id="determinacion">
+  <div class="sec-head reveal"><span class="sec-num">02</span><h2>Determinación de un <em>conjunto</em></h2></div>
+
+  <div class="duo">
+    <div class="panel reveal">
+      <span class="tag tag-a">Por extensión</span>
+      <h3>Uno a uno</h3>
+      <p>Se enumeran <strong>todos los elementos</strong> del conjunto entre llaves.</p>
+      <div class="formula">M = {a, e, i, o, u}</div>
+      <p>Si es <strong>infinito</strong>, se cierra la llave tras puntos suspensivos para indicar que no hay último elemento: <span class="mono">ℕ = {1, 2, 3, 4, …}</span>. Si es <strong>finito</strong>, los puntos suspensivos abrevian hasta el último elemento: <span class="mono">P = {a, b, c, …, z}</span>.</p>
+    </div>
+    <div class="panel reveal">
+      <span class="tag tag-b">Por comprensión</span>
+      <h3>Una propiedad común</h3>
+      <p>Se especifica una propiedad que cumplen todos los elementos. El símbolo <span class="mono">/</span> significa “tal que”.</p>
+      <div class="formula">M = {x / x es vocal del abecedario}</div>
+      <p>Los múltiplos de 2 menores que 14 quedan: <span class="mono">A = {x / x = 2k, k ∈ ℕ, 1 ≤ k ≤ 6}</span></p>
+    </div>
+  </div>
+
+  <div class="panel reveal" style="margin-top:1.4rem">
+    <span class="tag tag-b">Diagrama de Venn</span>
+    <p>Es una <strong>representación gráfica</strong> de los conjuntos: cada conjunto se simboliza con una curva cerrada, y el universal con un rectángulo. Los elementos se ubican dentro de su región.</p>
+  </div>
+
+  <div class="ej-box reveal">
+    <p class="ej-t">✎ Ejercicio 1</p>
+    <p class="ex-q">Expresar por extensión el conjunto B = {x / x ∈ ℕ y 2 ≤ x &lt; 5}</p>
+    <button class="reveal-btn">Ver respuesta</button>
+    <div class="ex-a"><div><p class="ans">B = {2, 3, 4}</p></div></div>
+  </div>
+</section>
+
+<!-- ================= 03 ESPECIALES ================= -->
+<section id="especiales">
+  <div class="sec-head reveal"><span class="sec-num">03</span><h2>Conjuntos <em>especiales</em></h2></div>
+  <p class="lead reveal">En el lenguaje común “conjunto” da idea de pluralidad, pero la teoría generaliza el concepto: un conjunto puede tener un solo elemento… o ninguno.</p>
+
+  <div class="grid g4 reveal" style="margin-top:1.6rem">
+    <div class="card"><h4>3 elementos</h4><p class="set" style="font-size:1.5rem">Terna</p><small>Ej.: {a, b, c}</small></div>
+    <div class="card"><h4>2 elementos</h4><p class="set" style="font-size:1.5rem">Par</p><small>Ej.: {pantalla, teclado}</small></div>
+    <div class="card"><h4>1 elemento</h4><p class="set" style="font-size:1.5rem">Unitario</p><small>Ej.: {ratón}</small></div>
+    <div class="card"><h4>0 elementos</h4><p class="set" style="font-size:1.5rem">Vacío <span class="hi-r">∅</span></p><small>Ej.: diagonales de un triángulo</small></div>
+  </div>
+
+  <div class="def reveal" style="margin-top:1.6rem;border-left-color:var(--rose)">
+    El conjunto vacío cumple un papel importante en la teoría y tiene símbolo propio: <span class="mono hi-r">∅</span>.
+    <span class="mono">K = {x / x es diagonal del triángulo abc} = { } = ∅</span>
+    <span style="color:var(--mut);font-size:.92rem">Puesto que carece de elementos que lo distingan, el conjunto vacío es siempre el mismo: decimos <em>el</em> conjunto vacío, no <em>un</em> conjunto vacío.</span>
+  </div>
+</section>
+
+<!-- ================= 04 INCLUSIÓN E IGUALDAD ================= -->
+<section id="inclusion">
+  <div class="sec-head reveal"><span class="sec-num">04</span><h2>Inclusión e <em>igualdad</em></h2></div>
+
+  <div class="def reveal">
+    <strong>B está incluido en A</strong> si todo elemento de B pertenece a A.
+    <span class="mono">B ⊆ A ⟺ ∀x ∈ B ⟹ x ∈ A</span>
+  </div>
+
+  <div class="panel reveal" style="margin-top:1.4rem">
+    <h3>Ejemplo</h3>
+    <p>Con <span class="mono hi-b">B = {2, 3, 4}</span> y <span class="mono hi-a">A = {1, 2, 3, 4, 5}</span>:</p>
+    <p class="mono" style="margin-top:.6rem"><span class="hi-t">B ⊆ A</span> — todos los elementos de B están en A.<br>
+    <span class="hi-r">A ⊈ B</span> — pues 1 ∈ A pero 1 ∉ B.</p>
+  </div>
+
+  <div class="vs">
+    <div class="panel reveal">
+      <p class="big hi-a">∈</p>
+      <h3>Pertenencia</h3>
+      <p style="color:var(--mut)">Vincula <strong>un elemento con un conjunto</strong>.<br><span class="mono">a ∈ M &nbsp;·&nbsp; b ∉ M</span></p>
+    </div>
+    <div class="panel reveal">
+      <p class="big hi-b">⊆</p>
+      <h3>Inclusión</h3>
+      <p style="color:var(--mut)">Vincula <strong>dos conjuntos</strong> entre sí.<br><span class="mono">B ⊆ A &nbsp;·&nbsp; A ⊈ B</span></p>
+    </div>
+  </div>
+
+  <div class="def reveal" style="margin-top:1.6rem;border-left-color:var(--teal)">
+    <strong>Igualdad:</strong> dos conjuntos A y B son iguales si y solo si cada uno está incluido en el otro.
+    <span class="mono">A = B ⟺ A ⊆ B y B ⊆ A</span>
+    <span style="color:var(--mut);font-size:.92rem">Ej.: A = {4, 5, 6}, B = {3, 4, 5, 6}, C = {4, 5, 6} → A ≠ B (porque 3 ∈ B y 3 ∉ A), pero A = C.</span>
+  </div>
+
+  <p class="lead reveal" style="margin-top:1.2rem"><span class="mono hi-t">∀A, ∅ ⊆ A</span> — el conjunto vacío está incluido en todo conjunto.</p>
+</section>
+
+<!-- ================= 05 OPERACIONES ================= -->
+<section id="operaciones">
+  <div class="sec-head reveal"><span class="sec-num">05</span><h2>Laboratorio de <em>operaciones</em></h2></div>
+  <p class="lead reveal">Trabajamos con <span class="mono hi-a">A = {3, 6, 9, 12, 15}</span> y <span class="mono hi-b">B = {6, 12, 18, 24}</span>. Elegí una operación y mirá qué región del diagrama se enciende.</p>
+
+  <div class="ops-btns reveal" role="tablist" style="margin-top:1.6rem">
+    <button class="op-btn act" data-op="inter">A ∩ B</button>
+    <button class="op-btn" data-op="union">A ∪ B</button>
+    <button class="op-btn" data-op="dAB">A − B</button>
+    <button class="op-btn" data-op="dBA">B − A</button>
+    <button class="op-btn" data-op="sym">A △ B</button>
+    <button class="op-btn" data-op="comp">A′</button>
+  </div>
+
+  <div class="lab">
+    <div class="lab-svg-wrap reveal">
+      <svg viewBox="0 0 380 300" width="100%" role="img" aria-label="Diagrama de Venn interactivo">
+        <defs>
+          <mask id="mOutB"><rect width="380" height="300" fill="#fff"/><circle cx="230" cy="150" r="90" fill="#000"/></mask>
+          <mask id="mOutA"><rect width="380" height="300" fill="#fff"/><circle cx="150" cy="150" r="90" fill="#000"/></mask>
+          <mask id="mInB"><circle cx="230" cy="150" r="90" fill="#fff"/></mask>
+          <mask id="mOutBoth"><rect width="380" height="300" fill="#fff"/><circle cx="150" cy="150" r="90" fill="#000"/><circle cx="230" cy="150" r="90" fill="#000"/></mask>
+        </defs>
+        <rect x="10" y="10" width="360" height="280" rx="8" fill="#fff0f2"/>
+        <!-- regiones -->
+        <rect class="region" data-region="outside" x="10" y="10" width="360" height="280" rx="8" fill="#fb7185" mask="url(#mOutBoth)"/>
+        <circle class="region" data-region="cresA" cx="150" cy="150" r="90" fill="#f6b73c" mask="url(#mOutB)"/>
+        <circle class="region" data-region="cresB" cx="230" cy="150" r="90" fill="#54c8f5" mask="url(#mOutA)"/>
+        <circle class="region" data-region="lens" cx="150" cy="150" r="90" fill="#3ddbb4" mask="url(#mInB)"/>
+        <!-- bordes -->
+        <circle cx="150" cy="150" r="90" fill="none" stroke="#e8960c" stroke-width="2.5"/>
+        <circle cx="230" cy="150" r="90" fill="none" stroke="#22a9e0" stroke-width="2.5"/>
+        <rect x="10" y="10" width="360" height="280" rx="8" fill="none" stroke="#c9c0dd" stroke-width="2"/>
+        <!-- nombres -->
+        <text x="24" y="36" class="set-name" fill="#6f6a85" font-size="18">U</text>
+        <text x="66" y="72" class="set-name" fill="#d97706">A</text>
+        <text x="298" y="72" class="set-name" fill="#0e7fb8">B</text>
+        <!-- elementos -->
+        <text class="lab-label" data-lab="cresA" x="82" y="130" font-size="15">3</text>
+        <text class="lab-label" data-lab="cresA" x="72" y="170" font-size="15">9</text>
+        <text class="lab-label" data-lab="cresA" x="102" y="192" font-size="15">15</text>
+        <text class="lab-label" data-lab="lens" x="178" y="140" font-size="15" fill="#0b3d34">6</text>
+        <text class="lab-label" data-lab="lens" x="198" y="170" font-size="15" fill="#0b3d34">12</text>
+        <text class="lab-label" data-lab="cresB" x="286" y="130" font-size="15">18</text>
+        <text class="lab-label" data-lab="cresB" x="272" y="172" font-size="15">24</text>
+        <text class="lab-label" data-lab="outside" x="40" y="55" font-size="14">1</text>
+        <text class="lab-label" data-lab="outside" x="336" y="60" font-size="14">4</text>
+        <text class="lab-label" data-lab="outside" x="38" y="258" font-size="14">5</text>
+        <text class="lab-label" data-lab="outside" x="340" y="256" font-size="14">7</text>
+        <text class="lab-label" data-lab="outside" x="185" y="276" font-size="13">…</text>
+      </svg>
+    </div>
+
+    <div class="op-info reveal" aria-live="polite">
+      <span class="op-tag" id="opTag">Intersección</span>
+      <div class="op-sym" id="opSym">A ∩ B</div>
+      <div class="op-def" id="opDef">A ∩ B = { x / x ∈ A y x ∈ B }</div>
+      <p class="op-desc" id="opDesc">Los elementos que pertenecen a A y a B al mismo tiempo.</p>
+      <div class="op-res"><span class="lbl">Resultado →</span><span id="opRes"></span></div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:2.6rem" class="reveal">Notas y propiedades</h3>
+  <div class="props reveal">
+    <div class="prop"><span class="p-name">Disyuntos</span><code>A ∩ B = ∅ ⟹ A y B son disjuntos.<br>Ej.: pares ∩ impares = ∅ · ℚ ∩ I = ∅</code></div>
+    <div class="prop"><span class="p-name">Intersección</span><code>A ∩ A = A<br>A ∩ B = B ∩ A<br>A ∩ (B ∩ C) = (A ∩ B) ∩ C</code></div>
+    <div class="prop"><span class="p-name">Unión</span><code>A ∪ A = A<br>A ∪ B = B ∪ A<br>A ∪ (B ∪ C) = (A ∪ B) ∪ C</code></div>
+    <div class="prop"><span class="p-name">Distributivas</span><code>A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C)<br>A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C)</code></div>
+    <div class="prop"><span class="p-name">Complemento</span><code>A ∪ A′ = U &nbsp;·&nbsp; A ∩ A′ = ∅<br>(A′)′ = A &nbsp;·&nbsp; U′ = ∅ &nbsp;·&nbsp; ∅′ = U</code></div>
+    <div class="prop"><span class="p-name">De Morgan</span><code>(A ∩ B)′ = A′ ∪ B′<br>(A ∪ B)′ = A′ ∩ B′</code></div>
+    <div class="prop"><span class="p-name">Diferencia</span><code>A − B = A ∩ B′<br>Si A ⊆ B ⟹ A − B = ∅<br>Si A ∩ B = ∅ ⟹ A − B = A</code></div>
+    <div class="prop"><span class="p-name">Dif. simétrica</span><code>A △ B = (A ∪ B) − (A ∩ B)<br>A △ B = (A − B) ∪ (B − A)</code></div>
+  </div>
+</section>
+
+<!-- ================= 06 PARTES ================= -->
+<section id="partes">
+  <div class="sec-head reveal"><span class="sec-num">06</span><h2>Conjunto de <em>partes</em> P(A)</h2></div>
+  <div class="def reveal">
+    Dado un conjunto A, <strong>P(A)</strong> es el conjunto formado por <strong>todos los subconjuntos de A</strong>.
+    <span class="mono">P(A) = { X / X ⊆ A }</span>
+    <span style="color:var(--mut);font-size:.92rem">Nunca es vacío: como ∅ ⊆ A y A ⊆ A, siempre ∅ ∈ P(A) y A ∈ P(A). Si A tiene n elementos, P(A) tiene 2ⁿ elementos.</span>
+  </div>
+  <div class="panel reveal" style="margin-top:1.4rem">
+    <h3>Ejemplo: A = {a, b, c}</h3>
+    <p style="color:var(--mut)">Sus 8 subconjuntos (pasá el mouse por cada uno):</p>
+    <div class="subsets">
+      <span class="subset">∅</span><span class="subset">{a}</span><span class="subset">{b}</span><span class="subset">{c}</span>
+      <span class="subset">{a, b}</span><span class="subset">{a, c}</span><span class="subset">{b, c}</span><span class="subset">{a, b, c}</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 07 CARDINAL ================= -->
+<section id="cardinal">
+  <div class="sec-head reveal"><span class="sec-num">07</span><h2>Cardinal de un <em>conjunto</em></h2></div>
+  <p class="lead reveal">Denotamos con <span class="mono hi-t">n(A)</span> al número de elementos del conjunto A: es su <strong>cardinal</strong>. También se escribe <span class="mono">#A</span>, <span class="mono">Card(A)</span> o <span class="mono">|A|</span>.</p>
+
+  <div class="formula-big reveal">
+    n(A ∪ B) = n(A) + n(B) − n(A ∩ B)<br>
+    Si A y B son disjuntos: &nbsp;n(A ∪ B) = n(A) + n(B)
+  </div>
+  <div class="formula-big reveal">
+    n(A ∪ B ∪ C) = n(A) + n(B) + n(C) − n(A ∩ B) − n(A ∩ C) − n(B ∩ C) + n(A ∩ B ∩ C)
+  </div>
+
+  <div class="panel reveal">
+    <h3>Ejemplo guiado</h3>
+    <p style="color:var(--mut)">Con <span class="mono hi-a">A = {−2, −1, 0, 1, 2}</span> y <span class="mono hi-b">B = {x / x es divisible por 2 y −5 &lt; x &lt; 5}</span> = {−4, −2, 0, 2, 4}:</p>
+    <p class="mono" style="margin-top:.6rem">n(A) = <span class="hi-a">5</span> &nbsp;·&nbsp; n(B) = <span class="hi-b">5</span> &nbsp;·&nbsp; A ∩ B = {−2, 0, 2} → n(A ∩ B) = <span class="hi-t">3</span></p>
+  </div>
+
+  <div class="club">
+    <div class="reveal">
+      <h3>🏆 El club deportivo — caso completo</h3>
+      <p style="color:var(--mut);font-size:.95rem">En un club de <strong>1000 socios</strong>, hay <strong>800</strong> que practican al menos un deporte entre fútbol, básquet y tenis.</p>
+      <ul class="data-list">
+        <li>n(F) — juegan al fútbol <b>400</b></li>
+        <li>n(B) — juegan al básquet <b>350</b></li>
+        <li>n(T) — juegan al tenis <b>300</b></li>
+        <li>n(F ∩ B) <b>100</b></li>
+        <li>n(B ∩ T) <b>130</b></li>
+        <li>n(F ∩ T) <b>80</b></li>
+      </ul>
+      <div class="formula-big" style="margin-top:1.2rem;font-size:.85rem">
+        800 = 400 + 350 + 300 − 100 − 80 − 130 + n(F ∩ B ∩ T)<br>
+        ⟹ <span style="color:var(--teal-t)">n(F ∩ B ∩ T) = 60</span>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <svg viewBox="0 0 360 320" width="100%" role="img" aria-label="Diagrama de Venn del club deportivo">
+        <rect x="6" y="6" width="348" height="308" rx="8" fill="#fffdf8" stroke="#c9c0dd" stroke-width="2"/>
+        <text x="18" y="28" class="set-name" fill="#6f6a85" font-size="15">U = 1000 socios</text>
+        <circle cx="135" cy="135" r="85" fill="rgba(246,183,60,.28)" stroke="#e8960c" stroke-width="2.5"/>
+        <circle cx="225" cy="135" r="85" fill="rgba(84,200,245,.28)" stroke="#22a9e0" stroke-width="2.5"/>
+        <circle cx="180" cy="205" r="85" fill="rgba(251,113,133,.25)" stroke="#f43f5e" stroke-width="2.5"/>
+        <text x="60" y="66" class="set-name" fill="#d97706">F</text>
+        <text x="284" y="66" class="set-name" fill="#0e7fb8">B</text>
+        <text x="180" y="312" class="set-name" fill="#d43d5b" text-anchor="middle">T</text>
+        <text x="85" y="96" class="lab-label on" font-size="16">280</text>
+        <text x="265" y="96" class="lab-label on" font-size="16">180</text>
+        <text x="180" y="266" class="lab-label on" font-size="16">150</text>
+        <text x="180" y="110" class="lab-label on" font-size="15">40</text>
+        <text x="118" y="200" class="lab-label on" font-size="15">20</text>
+        <text x="232" y="200" class="lab-label on" font-size="15">70</text>
+        <text x="180" y="168" class="lab-label on" font-size="16" fill="#0d7d6c">60</text>
+      </svg>
+      <div class="res-grid">
+        <div class="res-cell"><div class="n">60</div><div class="d">los tres deportes</div></div>
+        <div class="res-cell"><div class="n">40</div><div class="d">fútbol y básquet, no tenis</div></div>
+        <div class="res-cell"><div class="n">70</div><div class="d">básquet y tenis, no fútbol</div></div>
+        <div class="res-cell"><div class="n">20</div><div class="d">fútbol y tenis, no básquet</div></div>
+        <div class="res-cell"><div class="n">280</div><div class="d">solo fútbol</div></div>
+        <div class="res-cell"><div class="n">180</div><div class="d">solo básquet</div></div>
+        <div class="res-cell"><div class="n">150</div><div class="d">solo tenis</div></div>
+        <div class="res-cell"><div class="n">200</div><div class="d">no practican ninguno</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 08 EJERCICIOS ================= -->
+<section id="ejercicios">
+  <div class="sec-head reveal"><span class="sec-num">08</span><h2>Ejercicios del <em>apunte</em></h2></div>
+  <p class="lead reveal">Los casos particulares propuestos en la guía. Intentá resolverlos antes de revelar la respuesta.</p>
+
+  <div class="grid" style="grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:1.6rem">
+    <div class="ej-box reveal">
+      <p class="ej-t">✎ Ejercicio 2 — Intersección</p>
+      <div class="ex-item"><p class="ex-q">A ∩ ∅ = …</p><button class="reveal-btn">Ver respuesta</button><div class="ex-a"><div><p class="ans">∅</p></div></div></div>
+      <div class="ex-item"><p class="ex-q">A ∩ A = …</p><button class="reveal-btn">Ver respuesta</button><div class="ex-a"><div><p class="ans">A (idempotencia)</p></div></div></div>
+      <div class="ex-item"><p class="ex-q">ℕ ∩ ℤ = …</p><button class="reveal-btn">Ver respuesta</button><div class="ex-a"><div><p class="ans">ℕ (todo natural es entero)</p></div></div></div>
+      <div class="ex-item"><p class="ex-q">ℚ ∩ I = …</p><button class="reveal-btn">Ver respuesta</button><div class="ex-a"><div><p class="ans">∅ (conjuntos disjuntos)</p></div></div></div>
+    </div>
+
+    <div class="ej-box reveal">
+      <p class="ej-t">✎ Ejercicio 3 — Unión</p>
+      <div class="ex-item"><p class="ex-q">A ∪ ∅ = …</p><button class="reveal-btn">Ver respuesta</button><div class="ex-a"><div><p class="ans">A</p></div></div></div>
+      <div class="ex-item"><p class="ex-q">A ∪ A = …</p><button class="reveal-btn">Ver respuesta</button><div class="ex-a"><div><p class="ans">A (idempotencia)</p></div></div></div>
+      <div class="ex-item"><p class="ex-q">ℕ ∪ ℤ = …</p><button class="reveal-btn">Ver respuesta</button><div class="ex-a"><div><p class="ans">ℤ</p></div></div></div>
+      <div class="ex-item"><p class="ex-q">ℚ ∪ I = …</p><button class="reveal-btn">Ver respuesta</button><div class="ex-a"><div><p class="ans">ℝ</p></div></div></div>
+    </div>
+
+    <div class="ej-box reveal">
+      <p class="ej-t">✎ Ejercicio 4 — Complemento (U = ℝ)</p>
+      <div class="ex-item"><p class="ex-q">∅′ = … &nbsp;·&nbsp; U′ = …</p><button class="reveal-btn">Ver respuesta</button><div class="ex-a"><div><p class="ans">∅′ = U &nbsp;·&nbsp; U′ = ∅</p></div></div></div>
+      <div class="ex-item"><p class="ex-q">{0}′ = …</p><button class="reveal-btn">Ver respuesta</button><div class="ex-a"><div><p class="ans">ℝ − {0}</p></div></div></div>
+      <div class="ex-item"><p class="ex-q">ℚ′ = …</p><button class="reveal-btn">Ver respuesta</button><div class="ex-a"><div><p class="ans">I (los números irracionales)</p></div></div></div>
+    </div>
+
+    <div class="ej-box reveal">
+      <p class="ej-t">✎ Ejercicio 5 — Diferencia</p>
+      <div class="ex-item"><p class="ex-q">A − ∅ = …</p><button class="reveal-btn">Ver respuesta</button><div class="ex-a"><div><p class="ans">A</p></div></div></div>
+      <div class="ex-item"><p class="ex-q">A − A = …</p><button class="reveal-btn">Ver respuesta</button><div class="ex-a"><div><p class="ans">∅</p></div></div></div>
+      <div class="ex-item"><p class="ex-q">ℤ − ℕ = …</p><button class="reveal-btn">Ver respuesta</button><div class="ex-a"><div><p class="ans">{…, −3, −2, −1, 0}</p></div></div></div>
+      <div class="ex-item"><p class="ex-q">ℚ − I = …</p><button class="reveal-btn">Ver respuesta</button><div class="ex-a"><div><p class="ans">ℚ (son disjuntos: ℚ ∩ I = ∅)</p></div></div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="f-mark"><b>A</b> ∪ <i>B</i> = B ∪ <b>A</b></div>
+  <p>Basado en el apunte «Conjuntos» — Matemática General · Prof. Gustavo Vazquez</p>
+  <p style="margin-top:.3rem;opacity:.6">∀x ∈ este sitio: x fue aprendido ♡</p>
+</footer>
+
+<script>
+/* ---------- barra de progreso ---------- */
+const prog=document.getElementById('prog');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  prog.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+},{passive:true});
+
+/* ---------- reveal on scroll ---------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* ---------- laboratorio de operaciones ---------- */
+const OPS={
+ inter:{tag:'Intersección',sym:'A ∩ B',def:'A ∩ B = { x / x ∈ A y x ∈ B }',desc:'Los elementos que pertenecen a A y a B al mismo tiempo. Si no hay elementos comunes, los conjuntos son disjuntos: A ∩ B = ∅.',res:['6','12'],regions:['lens']},
+ union:{tag:'Unión',sym:'A ∪ B',def:'A ∪ B = { x / x ∈ A o x ∈ B }',desc:'Todos los elementos que pertenecen a A, a B, o a ambos. Cada elemento se anota una sola vez.',res:['3','6','9','12','15','18','24'],regions:['cresA','lens','cresB']},
+ dAB:{tag:'Diferencia',sym:'A − B',def:'A − B = { x / x ∈ A y x ∉ B }',desc:'Los elementos de A que no pertenecen a B. Propiedad clave: A − B = A ∩ B′.',res:['3','9','15'],regions:['cresA']},
+ dBA:{tag:'Diferencia',sym:'B − A',def:'B − A = { x / x ∈ B y x ∉ A }',desc:'Los elementos de B que no pertenecen a A. Notar que, en general, A − B ≠ B − A: la diferencia no es conmutativa.',res:['18','24'],regions:['cresB']},
+ sym:{tag:'Diferencia simétrica',sym:'A △ B',def:'A △ B = { x / x ∈ A o x ∈ B, pero no a ambos }',desc:'Los elementos que están en A o en B, excluyendo los comunes. A △ B = (A ∪ B) − (A ∩ B) = (A − B) ∪ (B − A).',res:['3','9','15','18','24'],regions:['cresA','cresB']},
+ comp:{tag:'Complemento',sym:'A′',def:'A′ = { x / x ∈ U y x ∉ A }',desc:'Todos los elementos del referencial U que no pertenecen a A. Se cumple A ∪ A′ = U y A ∩ A′ = ∅. Doble negación: (A′)′ = A.',res:['1','4','5','7','…'],regions:['outside']}
+};
+const regions=document.querySelectorAll('[data-region]');
+const labels=document.querySelectorAll('[data-lab]');
+function setOp(k){
+  const o=OPS[k];
+  document.querySelectorAll('.op-btn').forEach(b=>b.classList.toggle('act',b.dataset.op===k));
+  regions.forEach(r=>r.classList.toggle('on',o.regions.includes(r.dataset.region)));
+  labels.forEach(l=>l.classList.toggle('on',o.regions.includes(l.dataset.lab)));
+  document.getElementById('opTag').textContent=o.tag;
+  document.getElementById('opSym').textContent=o.sym;
+  document.getElementById('opDef').textContent=o.def;
+  document.getElementById('opDesc').textContent=o.desc;
+  document.getElementById('opRes').innerHTML=o.res.map((v,i)=>`<span class="elem" style="animation-delay:${i*70}ms">${v}</span>`).join(' ');
+}
+document.querySelectorAll('.op-btn').forEach(b=>b.addEventListener('click',()=>setOp(b.dataset.op)));
+regions.forEach(r=>r.addEventListener('click',()=>{
+  const map={lens:'inter',cresA:'dAB',cresB:'dBA',outside:'comp'};
+  if(map[r.dataset.region])setOp(map[r.dataset.region]);
+}));
+setOp('inter');
+
+/* ---------- verificador de pertenencia ---------- */
+const M=['a','e','i','o','u'];
+const inp=document.getElementById('elemInput'),ver=document.getElementById('veredicto');
+inp.addEventListener('input',()=>{
+  const v=inp.value.trim().toLowerCase().slice(-1);
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('hit'));
+  if(!v){ver.textContent='—';ver.className='veredicto';return}
+  if(M.includes(v)){
+    ver.textContent=`${v} ∈ M ✓`;ver.className='veredicto ok';
+    document.querySelector(`.chip[data-l="${v}"]`)?.classList.add('hit');
+  }else{
+    ver.textContent=`${v} ∉ M ✗`;ver.className='veredicto no';
+  }
+});
+
+/* ---------- respuestas desplegables ---------- */
+document.querySelectorAll('.reveal-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const box=b.closest('.ex-item');
+    box.classList.toggle('open');
+    b.textContent=box.classList.contains('open')?'Ocultar':'Ver respuesta';
+  });
+});
+</script>
+</body>
+</html>
